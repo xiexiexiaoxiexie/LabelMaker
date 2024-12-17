@@ -23,7 +23,7 @@ from copy import copy
 
 sys.path.append(abspath(join(dirname(__file__), '..')))
 from utils_3d import fuse_mesh
-
+# python ./scripts/scanner3d2labelmaker.py --scan_dir $WORKSPACE_DIR --target_dir $WORKSPACE_DIR/output
 
 def extract_pose(data):
   return np.asarray(data['cameraPoseARFrame'])
@@ -75,6 +75,10 @@ def process_scanner3d(
 
   traj_file_list = glob.glob(join(color_dir, 'frame_*.json'))
   traj_file_list = sorted([os.path.basename(f) for f in traj_file_list], key=lambda x: int(x.split('_')[1].split('.json')[0]))
+  # fujing only include traj if there is a corresponding color image
+  color_base_names = {os.path.splitext(f)[0] for f in color_file_list}
+  traj_file_list = [f for f in traj_file_list if os.path.splitext(f)[0] in color_base_names]
+  # fujing
 
   # write to new file
   shutil.rmtree(target_dir, ignore_errors=True)
@@ -107,18 +111,19 @@ def process_scanner3d(
     pose_mat[:3, :3] = rotation
     pose_mat[:, 0] = -pose_mat[:, 0]
 
-    R_x_90 = np.array([[1, 0, 0, 0],
-        [0, np.cos(np.radians(90)), -np.sin(np.radians(90)), 0],
-        [0, np.sin(np.radians(90)), np.cos(np.radians(90)), 0],
-        [0, 0, 0, 1]])
+    # R_x_90 = np.array([[1, 0, 0, 0],
+    #     [0, np.cos(np.radians(90)), -np.sin(np.radians(90)), 0],
+    #     [0, np.sin(np.radians(90)), np.cos(np.radians(90)), 0],
+    #     [0, 0, 0, 1]])
     
-    R_z_90 = np.array([[np.cos(np.radians(-90)), -np.sin(np.radians(-90)), 0, 0],
-        [np.sin(np.radians(-90)), np.cos(np.radians(-90)), 0, 0],
-        [0, 0, 1, 0],
-        [0, 0, 0, 1]])
+    # R_z_90 = np.array([[np.cos(np.radians(-90)), -np.sin(np.radians(-90)), 0, 0],
+    #     [np.sin(np.radians(-90)), np.cos(np.radians(-90)), 0, 0],
+    #     [0, 0, 1, 0],
+    #     [0, 0, 0, 1]])
     
-    R_z_x = np.dot(R_z_90, R_x_90)
-    pose_mat = np.dot(R_z_x, pose_mat)
+    # R_z_x = np.dot(R_z_90, R_x_90)
+    # pose_mat = np.dot(R_z_x, pose_mat)
+
 
     # save color
     tgt_color_pth = join(target_dir, 'color',
@@ -176,7 +181,7 @@ def arg_parser():
   parser.add_argument("--target_dir", type=str)
   parser.add_argument("--sdf_trunc", type=float, default=0.04)
   parser.add_argument("--voxel_length", type=float, default=0.008)
-  parser.add_argument("--depth_trunc", type=float, default=3.0)
+  parser.add_argument("--depth_trunc", type=float, default=6.0)
   parser.add_argument('--config', help='Name of config file')
 
   return parser.parse_args()
@@ -193,4 +198,6 @@ if __name__ == "__main__":
       voxel_length=args.voxel_length,
       depth_trunc=args.depth_trunc,
       resize=[640, 480],
+      # resize=[1920, 1440],
+
   )

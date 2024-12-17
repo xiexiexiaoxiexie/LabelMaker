@@ -1,3 +1,4 @@
+https://mojie0201.xn--8stx8olrwkucjq3b.com/api/v1/client/subscribe?token=80cef1470fe0ebfb7173453d25267381
 # LabelMaker
 
 ![LabelMaker Pipeline Overview](https://labelmaker.org/static/images/labelmaker_teaser.png)

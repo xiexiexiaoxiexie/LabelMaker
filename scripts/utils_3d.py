@@ -15,7 +15,7 @@ def fuse_mesh(
     scan_dir: str,
     sdf_trunc: float = 0.06,
     voxel_length: float = 0.02,
-    depth_trunc: float = 3.0,
+    depth_trunc: float = 6.0,
     depth_scale: float = 1000.0,
 ):
 
@@ -61,16 +61,50 @@ def fuse_mesh(
     color = np.asanyarray(Image.open(join(color_dir, color_f))).astype(np.uint8)
     depth = np.asarray(Image.open(join(depth_dir, depth_f))).astype(np.uint16)
 
+    # fujing resize the image/depth/intrinsics
+    # resize_ratio=3.2 # 1536/480
+    # color = cv2.resize(color, (int(color.shape[1] / resize_ratio), int(color.shape[0] / resize_ratio)))
+    # depth = cv2.resize(depth, (int(depth.shape[1] / resize_ratio), int(depth.shape[0] / resize_ratio)))
+    # intr[0, 0] /= resize_ratio
+    # intr[1, 1] /= resize_ratio
+    # intr[0, 2] /= resize_ratio
+    # intr[1, 2] /= resize_ratio
+
+
     h, w, _ = color.shape
     color = o3d.geometry.Image(color)
     depth = o3d.geometry.Image(depth)
-  
     rgbd = o3d.geometry.RGBDImage.create_from_color_and_depth(
         color=color,
         depth=depth,
         depth_scale=depth_scale,
         depth_trunc=depth_trunc,
         convert_rgb_to_intensity=False)
+    # intrinsics = o3d.camera.PinholeCameraIntrinsic(
+    # width=w,
+    # height=h,
+    # fx=intr[0, 0],
+    # fy=intr[1, 1],
+    # cx=intr[0, 2],
+    # cy=intr[1, 2]
+    # )
+    # pcd = o3d.geometry.PointCloud.create_from_rgbd_image(
+    # rgbd,
+    # intrinsics
+    # )
+    # vis = o3d.visualization.Visualizer()
+    # vis.create_window(window_name="3D RGBD Visualization")
+    # vis.add_geometry(pcd)
+    # vis.run()
+
+    camera_to_pose = np.array([
+    [-1, 0, 0, 0],
+    [0, 0, -1, 0],
+    [0, -1, 0, 0],
+    [0, 0, 0, 1]
+    ])
+    # pose_=np.dot(pose,camera_to_pose)
+    pose_=pose
 
     tsdf.integrate(
         image=rgbd,
@@ -82,11 +116,15 @@ def fuse_mesh(
             cx=intr[0, 2],
             cy=intr[1, 2]
         ),
-        extrinsic=np.linalg.inv(pose),
+        extrinsic=np.linalg.inv(pose_),
     )
-
+  
   mesh = tsdf.extract_triangle_mesh()
   o3d.io.write_triangle_mesh(join(scan_dir, 'mesh.ply'), mesh)
+
+def simplify_mesh(scan_dir,mesh, target_faces):
+  simplified_mesh = mesh.simplify_quadric_decimation(target_number_of_triangles=800000)
+  o3d.io.write_triangle_mesh(join(scan_dir, 'simplified_mesh.ply'), simplified_mesh)
 
 
 def arg_parser():
@@ -112,3 +150,5 @@ if __name__ == "__main__":
       depth_trunc=args.depth_trunc,
       depth_scale=args.depth_scale,
   )
+  simplify_mesh(args.workspace, o3d.io.read_triangle_mesh(args.workspace+'/mesh_original.ply'), 20000)
+  

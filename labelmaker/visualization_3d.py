@@ -31,11 +31,23 @@ def read_labels(scene_path):
 
 def colorize_labels(labels, color_map='consensus'):
   n = labels.shape[0]
+  print(f"n: {n}")
   colors = np.zeros((n, 3))
+  print(f"np.unique(labels): {np.unique(labels)}")
   cmap = COLOR_MAPS[color_map]()
-  
+  print(f"cmap: {cmap}")
+  # fujing
+  id_to_color = {entry['id']: entry['color'] for entry in cmap}
+  # fujing
   for i in np.unique(labels):
+    print(f"i: {i}")
+    if i>185:
+       continue
     colors[labels == i] = cmap[int(i)]['color']
+    # fujing
+    # colors[labels == i] =id_to_color.get(i, None)
+    # fujing
+
   
   colors = colors / 255.
   return colors

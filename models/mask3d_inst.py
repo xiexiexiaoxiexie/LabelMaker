@@ -144,7 +144,8 @@ def run_mask3d(
   points = np.asarray(mesh.vertices).copy()
   if flip:
     points[:, 0] *= -1  # flip x axis
-  colors = np.asarray(mesh.vertex_colors)
+  # N*3
+  colors = np.asarray(mesh.vertex_colors) 
   colors = colors * 255.
 
   pseudo_image = colors.astype(np.uint8)[np.newaxis, :, :]

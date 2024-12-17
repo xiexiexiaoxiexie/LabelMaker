@@ -8,7 +8,7 @@ import shutil
 from joblib import Parallel, delayed
 
 from labelmaker.label_mappings import LabelMatcher
-
+# https://github.com/cvg/LabelMaker/blob/b3397d0be8897c8fcf7bf83b46c26e7d5f9bfe9e/labelmaker/consensus.py#L158
 # clean up imports
 import gin
 from typing import Union
@@ -29,7 +29,7 @@ class PredictorVoting:
     self.output_space = output_space
     # build lookup tables for predictor voting
     # some class spaces vote for multiple options in the wordnet output space
-    self.output_size = max(matcher_ade150.right_ids) + 1
+    self.output_size = max(matcher_ade150.right_ids) + 1 # size 189
     output_ids = np.arange(self.output_size)
     self.votes_from_ade150 = np.zeros((150, self.output_size), dtype=np.uint8)
     for ade150_id in range(150):
@@ -90,12 +90,13 @@ class PredictorVoting:
       shape = wn199_predictions[0].shape[:2]
     elif len(scannet_predictions) > 0:
       shape = scannet_predictions[0].shape[:2]
-
     # build consensus prediction
     # first, each prediction votes for classes in the output space
     votes = np.zeros((shape[0], shape[1], self.output_size), dtype=np.uint8)
+    # wn199_predictions list of (480,640)
     for pred in wn199_predictions:
-      vote = self.votes_from_wn199[pred]
+      # pred shape (480,640)
+      vote = self.votes_from_wn199[pred] #shape(480,640,189)
       vote[pred == -1] = 0
       votes += vote
     for pred in ade20k_predictions:
@@ -106,7 +107,7 @@ class PredictorVoting:
     for pred in scannet_predictions:
       votes += self.votes_from_scannet[pred]
 
-    pred_vote = np.argmax(votes, axis=2)
+    pred_vote = np.argmax(votes, axis=2) #shape(480,640) with max votes class
     n_votes = votes[np.arange(shape[0])[:, None],
                     np.arange(shape[1]), pred_vote]
     #n_votes = np.amax(votes, axis=2)
@@ -158,7 +159,7 @@ def wrapper_consensus(k, input_folders_str, output_dir_str, min_votes):
 def run(scene_dir: Union[str, Path],
         output_folder: Union[str, Path],
         n_jobs=-1,
-        min_votes=2):
+        min_votes=1):
 
   scene_dir = Path(scene_dir)
   output_folder = Path(output_folder)

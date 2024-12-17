@@ -125,9 +125,15 @@ def main(
     valid_mask = (xx >= 0) & (yy >= 0) & (xx < w) & (yy < h)
 
     d = depth[yy[valid_mask], xx[valid_mask]]
+    # fujing
+    # d=zz[valid_mask]
+    # end fujing
 
     valid_mask[valid_mask] = (zz[valid_mask] > 0) & (np.abs(zz[valid_mask] - d)
                                                      <= 0.1)
+    # fujing
+    # valid_mask[valid_mask] = (zz[valid_mask] > 0) & (d>2)
+    # end of fujing
 
     labels_2d = labels[yy[valid_mask], xx[valid_mask]]
     labels_3d[valid_mask, labels_2d] += 1

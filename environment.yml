@@ -178,7 +178,7 @@ dependencies:
     - pytz==2022.7.1
     - pywavelets==1.4.1
     - pyyaml==6.0
-    - pyzmq==25.0.0
+    - pyzmq
     - qtconsole==5.4.0
     - qtpy==2.3.0
     - rfc3339-validator==0.1.4

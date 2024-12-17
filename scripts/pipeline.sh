@@ -2,6 +2,14 @@
 # downloading is not included
 # this bash file is not meant for modification into other dataset, needs further modification
 # nor is it capable of tuning configuration, yet
+
+
+# WORKSPACE_DIR=/home/xiefujing/LabelMaker/azure/2024-11-07-17-08-50
+# WORKSPACE_DIR=/home/xiefujing/LabelMaker/apple_scanner/2024_11_12_17_01_00/output
+WORKSPACE_DIR=/home/xiefujing/LabelMaker/apple_scanner/2024_11_15_14_10_27_office/output
+
+
+
 env_name=labelmaker
 eval "$(conda shell.bash hook)"
 conda activate $env_name
@@ -88,7 +96,7 @@ python labelmaker/consensus.py \
 python labelmaker/lifting_3d/lifting_points.py \
   --workspace ${target_dir}
 
-conda deactivate
+# conda deactivate
 
-# 3D lifting, mesh extracting, and rendering
-bash labelmaker/lifting_3d/lifting.sh ${target_dir}
+# # 3D lifting, mesh extracting, and rendering
+# bash labelmaker/lifting_3d/lifting.sh ${target_dir}

@@ -19,3 +19,8 @@ wandb/
 build/
 *.simg
 data
+apple_scanner/
+arkitscenes/
+3rdparty/
+azure/
+checkpoints/
